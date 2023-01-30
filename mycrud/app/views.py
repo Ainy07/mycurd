@@ -1,16 +1,18 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
 from django.contrib import messages
-from django.contrib.auth.hashers import make_password,check_password
+from django.contrib.auth.hashers import make_password, check_password
 from . models import User
 
 
 # Create your views here
 
 def signup(request):
-    return render(request,"signup.html")
+    return render(request, "signup.html")
 
 # create signup form
+
+
 def registration(request):
     if request.method == 'POST':
         name = request.POST['name']
@@ -20,44 +22,52 @@ def registration(request):
         DOB = request.POST['DOB']
         contact = request.POST['contact']
         if User.objects.filter(email=email).exists():
-            messages.error(request,"Email already exists")
+            messages.error(request, "Email already exists")
+            return redirect("//")
         elif User.objects.filter(contact=contact).exists():
-            messages.error(request,"contact already exists")
+            messages.error(request, "contact already exists")
+            return redirect("//")
         else:
-            User.objects.create(name=name,email=email,contact=contact,DOB=DOB,password=password,address=address)
+            User.objects.create(name=name, email=email, contact=contact,
+                                DOB=DOB, password=password, address=address)
         return redirect("/login/")
-    
 
 
 def login(request):
-    return render(request,'login.html')    
+    return render(request, 'login.html')
 
 # create login form
+
+
 def login_form(request):
-    if request.method =='POST':
+    if request.method == 'POST':
         contact = request.POST['contact']
         user_password = request.POST['password']
         if User.objects.filter(contact=contact).exists():
-           obj = User.objects.get(contact=contact)
-           password = obj.password
-           if check_password(user_password, password):
+            obj = User.objects.get(contact=contact)
+            password = obj.password
+            if check_password(user_password, password):
                 return redirect("/table/")
-           else:
-            return HttpResponse('password incorrect')
+            else:
+                return HttpResponse('password incorrect')
     else:
         return HttpResponse("phone number is not registered")
-        
+
+
 def table(request):
     data = User.objects.all()
-    return render(request,'table.html',{"data":data})
+    return render(request, 'table.html', {"data": data})
 
-#create edit button
+# create edit button
+
 
 def update_view(request, uid):
-    res=User.objects.get(id=uid)
-    return render(request,'update.html',{'person':res})
+    res = User.objects.get(id=uid)
+    return render(request, 'update.html', {'person': res})
 
-#use update data
+# use update data
+
+
 def update_form_data(request):
     if request.method == 'POST':
         uid = request.POST['uid']
@@ -66,10 +76,14 @@ def update_form_data(request):
         address = request.POST['address']
         DOB = request.POST['DOB']
         contact = request.POST['contact']
-        User.objects.filter(id=uid).update(name=name,email=email,contact=contact,DOB=DOB,address=address)
+        User.objects.filter(id=uid).update(name=name, email=email,
+                                           contact=contact, DOB=DOB,
+                                           address=address)
         return redirect('/table/')
-    
-#create delete button
-def delete(request,pk):
+
+# create delete button
+
+
+def delete(request, pk):
     use = User.objects.filter(id=pk).delete()
     return redirect('/table/')
